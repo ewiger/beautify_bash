@@ -121,7 +121,7 @@ class BeautifyBash:
                             case_stack[-1] -= 1
                     # an ad-hoc solution for the "else" keyword
                     else_case = (
-                        0, -1)[re.search('^(else|elif)', test_record) != None]
+                        0, -1)[re.search('^(else)', test_record) != None]
                     net = inc - outc
                     tab += min(net, 0)
                     extab = tab + else_case
