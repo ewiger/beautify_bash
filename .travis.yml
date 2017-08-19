@@ -1,0 +1,11 @@
+language: python
+
+install: true
+
+addons:
+  apt:
+    packages:
+      - libtest-differences-perl
+
+script:
+  - make test

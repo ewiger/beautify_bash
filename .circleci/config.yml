@@ -1,0 +1,17 @@
+version: 2
+
+jobs:
+   build:
+      docker:
+         - image: circleci/python
+      steps:
+         - checkout
+         - run:
+               name: Build and install
+               command: 'sudo make install'
+         - run:
+               name: Test dependencies
+               command: 'sudo apt-get update; sudo apt-get install libtest-differences-perl'
+         - run:
+               name: Run tests
+               command: 'make test'
