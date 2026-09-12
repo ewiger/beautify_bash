@@ -6,8 +6,10 @@ import re
 from pathlib import Path
 
 import pytest
-from click.testing import Result
-from typer.testing import CliRunner
+
+# Typer >= 0.27 vendors click, so `click` is no longer installed alongside it;
+# `typer.testing` re-exports the result type under both.
+from typer.testing import CliRunner, Result
 
 from beautify_bash import __version__
 from beautify_bash.cli import app
