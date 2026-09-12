@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import pytest
@@ -13,13 +14,36 @@ from beautify_bash.cli import app
 
 runner = CliRunner()
 
+_ANSI = re.compile(r"\x1b\[[0-9;]*m")
+
+
+def plain(text: str) -> str:
+    """`text` with Rich's styling removed, leaving the characters a user sees.
+
+    Rich force-enables colour on CI runners (GitHub Actions sets no TTY but is
+    detected as one) and styles option names, which splits a literal like
+    ``--dialect`` across escape sequences. Assertions want the visible text.
+    """
+    return _ANSI.sub("", text)
+
 
 def notes(result: Result) -> str:
     """The run's diagnostic output, whether or not click separates streams."""
     try:
-        return result.stderr
+        return plain(result.stderr)
     except ValueError:  # click < 8.2 mixes stderr into stdout
-        return result.output
+        return plain(result.output)
+
+
+@pytest.fixture(autouse=True)
+def _fixed_terminal_width(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Pin the width Rich renders help at.
+
+    At the 80 columns a runner defaults to, Rich truncates the longer option
+    names (``--install-completion`` becomes ``--install-complet…``), so what
+    the help contains would otherwise depend on the terminal running the tests.
+    """
+    monkeypatch.setenv("COLUMNS", "100")
 
 
 MESSY = "#!/bin/bash\nif true; then\necho hi\nfi\n"
@@ -34,12 +58,12 @@ class TestInvocation:
 
     def test_no_arguments_shows_help(self) -> None:
         result = runner.invoke(app, [])
-        assert "FILES" in result.stdout
+        assert "FILES" in plain(result.stdout)
 
     def test_help(self) -> None:
         result = runner.invoke(app, ["--help"])
         assert result.exit_code == 0
-        assert "--dialect" in result.stdout
+        assert "--dialect" in plain(result.stdout)
 
 
 class TestDefaultOutput:
