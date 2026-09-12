@@ -60,7 +60,20 @@ def main(
     files: List[str] = typer.Argument(
         ...,
         metavar="FILES...",
-        help='Scripts to format; "-" reads stdin and writes stdout.',
+        help='Scripts to format; "-" reads standard input.',
+    ),
+    output: Optional[str] = typer.Option(
+        None,
+        "--output",
+        "-o",
+        metavar="PATH",
+        help='Write the result to PATH ("-" for stdout) instead of stdout.',
+    ),
+    write: bool = typer.Option(
+        False,
+        "--write",
+        "-w",
+        help="Rewrite each input file in place instead of printing.",
     ),
     indent_size: int = typer.Option(
         2, "--indent", "-i", min=0, help="Indentation width per level."
@@ -72,13 +85,13 @@ def main(
         DialectChoice.auto, "--dialect", "-d", help="Shell dialect to assume."
     ),
     check: bool = typer.Option(
-        False, "--check", help="Do not write; exit 1 if a file would change."
+        False, "--check", help="Write nothing; exit 1 if a file would change."
     ),
     show_diff: bool = typer.Option(
-        False, "--diff", help="Print a unified diff instead of writing."
+        False, "--diff", help="Print a unified diff instead of the result."
     ),
     backup: bool = typer.Option(
-        True, "--backup/--no-backup", help='Keep the original as "FILE~".'
+        True, "--backup/--no-backup", help='With -w, keep the original as "FILE~".'
     ),
     quiet: bool = typer.Option(False, "--quiet", "-q", help="Suppress progress notes."),
     version: Optional[bool] = typer.Option(
@@ -90,9 +103,15 @@ def main(
         help="Show the version and exit.",
     ),
 ) -> None:
-    """Format each FILE in place, or stream stdin to stdout for ``-``."""
-    dry_run = check or show_diff
+    """Print each formatted FILE to standard output.
+
+    Use ``-w`` to rewrite the files in place, or ``-o PATH`` to collect the
+    result in one file.  ``--check`` and ``--diff`` never write anything.
+    """
+    _reject_conflicting_modes(files, output, write, check, show_diff)
+
     exit_code = 0
+    collected: List[str] = []
 
     for name in files:
         try:
@@ -115,31 +134,56 @@ def main(
             exit_code = max(exit_code, 1)
 
         changed = result.text != data
-        if name == "-":
-            if show_diff:
-                typer.echo(_diff(data, result.text, label), nl=False)
-            elif not check:
-                typer.echo(result.text, nl=False)
-            if check and changed:
-                exit_code = max(exit_code, 1)
-            continue
+        if changed and (check or show_diff):
+            exit_code = max(exit_code, 1)
 
         if show_diff:
             typer.echo(_diff(data, result.text, label), nl=False)
         elif check:
             if changed and not quiet:
-                typer.echo(f"would reformat {name}")
-        elif changed:
-            if backup:
-                Path(f"{name}~").write_text(data, encoding="utf-8")
-            Path(name).write_text(result.text, encoding="utf-8")
-            if not quiet:
-                typer.echo(f"reformatted {name}")
+                typer.echo(f"would reformat {label}", err=True)
+        elif write:
+            if changed:
+                if backup:
+                    Path(f"{name}~").write_text(data, encoding="utf-8")
+                Path(name).write_text(result.text, encoding="utf-8")
+                if not quiet:
+                    typer.echo(f"reformatted {name}", err=True)
+        elif output is not None and output != "-":
+            collected.append(result.text)
+        else:
+            typer.echo(result.text, nl=False)
 
-        if dry_run and changed:
-            exit_code = max(exit_code, 1)
+    if collected:
+        assert output is not None  # guaranteed by the branch that filled `collected`
+        try:
+            Path(output).write_text("".join(collected), encoding="utf-8")
+        except OSError as exc:
+            typer.echo(f"beautify-bash: {output}: {exc.strerror}", err=True)
+            exit_code = max(exit_code, 2)
 
     raise typer.Exit(exit_code)
+
+
+def _reject_conflicting_modes(
+    files: List[str],
+    output: Optional[str],
+    write: bool,
+    check: bool,
+    show_diff: bool,
+) -> None:
+    """Fail early on option combinations that cannot all be honoured."""
+    if write and output is not None:
+        raise typer.BadParameter("--write cannot be combined with --output.")
+    if write and "-" in files:
+        raise typer.BadParameter("--write cannot rewrite standard input.")
+    if check and show_diff:
+        raise typer.BadParameter("--check cannot be combined with --diff.")
+    for flag, name in ((check, "--check"), (show_diff, "--diff")):
+        if flag and write:
+            raise typer.BadParameter(f"{name} cannot be combined with --write.")
+        if flag and output is not None:
+            raise typer.BadParameter(f"{name} cannot be combined with --output.")
 
 
 if __name__ == "__main__":  # pragma: no cover
