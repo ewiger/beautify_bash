@@ -42,7 +42,6 @@
 
 ## Infrastructure
 
-- [ ] Publish to PyPI and wire up trusted publishing from CI.
 - [ ] Property-based tests (Hypothesis): formatting is idempotent, and the
       token stream is unchanged by formatting.
 - [ ] A corpus test that runs the formatter over a set of real-world scripts

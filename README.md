@@ -1,9 +1,15 @@
+<div align="center">
+
 # beautify_bash
 
-[![CI](https://github.com/ewiger/beautify_bash/actions/workflows/ci.yml/badge.svg)](https://github.com/ewiger/beautify_bash/actions/workflows/ci.yml)
-[![PyPI](https://img.shields.io/pypi/v/beautify-bash)](https://pypi.org/project/beautify-bash/)
+**A code formatter / beautifier for `bash` and `zsh` shell scripts**
 
-A code formatter / beautifier for **bash** and **zsh** shell scripts.
+[![PyPI](https://img.shields.io/pypi/v/beautify-bash.svg)](https://pypi.org/project/beautify-bash/)
+[![Python versions](https://img.shields.io/pypi/pyversions/beautify-bash?color=blue&label=python)](https://pypi.org/project/beautify-bash/)
+[![CI](https://github.com/ewiger/beautify_bash/actions/workflows/ci.yml/badge.svg)](https://github.com/ewiger/beautify_bash/actions/workflows/ci.yml)
+[![License: GPL v2+](https://img.shields.io/badge/License-GPLv2%2B-yellow.svg)](https://github.com/ewiger/beautify_bash/blob/master/LICENSE)
+
+</div>
 
 Originally written in Ruby, then Python, by [Paul Lutus][arachnoid]; revived
 here with a proper package layout, a [Typer][typer] CLI, [uv][uv] tooling,
@@ -15,19 +21,28 @@ a test suite, and support for shell dialects.
 
 ## Install
 
+From [PyPI](https://pypi.org/project/beautify-bash/), with [uv][uv]:
+
 ```bash
-uv tool install beautify-bash      # as a standalone command
-uv add beautify-bash               # as a project dependency
-pipx install beautify-bash         # or with pipx
+uv tool install beautify-bash      # as a standalone command on your PATH
+uv add beautify-bash               # as a dependency of the current project
+uv pip install beautify-bash       # into the active environment
 ```
 
-Run it without installing:
+Or with pip / pipx:
+
+```bash
+pip install beautify-bash
+pipx install beautify-bash         # isolated, on your PATH
+```
+
+Run it once without installing anything:
 
 ```bash
 uvx beautify-bash script.sh
 ```
 
-Requires Python 3.9 or newer (tested through 3.14).
+Python 3.9 through 3.14.
 
 ## Use
 
