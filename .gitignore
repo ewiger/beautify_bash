@@ -28,3 +28,17 @@ pip-log.txt
 
 # Vim swap files
 *.swp
+
+# uv / virtualenvs
+.venv/
+uv.lock.bak
+
+# Tooling caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+htmlcov/
+coverage.xml
+
+# beautify_bash backups
+*~
