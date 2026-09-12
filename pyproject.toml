@@ -36,6 +36,7 @@ dependencies = [
 Homepage = "https://github.com/ewiger/beautify_bash"
 Repository = "https://github.com/ewiger/beautify_bash"
 Issues = "https://github.com/ewiger/beautify_bash/issues"
+Changelog = "https://github.com/ewiger/beautify_bash/blob/master/CHANGELOG.md"
 
 [project.scripts]
 beautify-bash = "beautify_bash.cli:app"

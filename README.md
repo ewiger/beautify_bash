@@ -1,5 +1,8 @@
 # beautify_bash
 
+[![CI](https://github.com/ewiger/beautify_bash/actions/workflows/ci.yml/badge.svg)](https://github.com/ewiger/beautify_bash/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/beautify-bash)](https://pypi.org/project/beautify-bash/)
+
 A code formatter / beautifier for **bash** and **zsh** shell scripts.
 
 Originally written in Ruby, then Python, by [Paul Lutus][arachnoid]; revived

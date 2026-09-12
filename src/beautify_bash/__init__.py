@@ -6,6 +6,9 @@ command line interface and dialect support.
 
 from __future__ import annotations
 
+from importlib.metadata import PackageNotFoundError
+from importlib.metadata import version as _version
+
 from .beautifier import (
     Beautifier,
     BeautifyBash,
@@ -15,7 +18,11 @@ from .beautifier import (
 )
 from .dialects import BASH, DIALECTS, ZSH, Dialect, detect_dialect, get_dialect
 
-__version__ = "2.0.0"
+try:
+    #: Single source of truth: the ``version`` field in ``pyproject.toml``.
+    __version__ = _version("beautify-bash")
+except PackageNotFoundError:  # pragma: no cover - running from an unbuilt tree
+    __version__ = "0.0.0+unknown"
 #: Historical spelling of the version constant.
 PVERSION = __version__
 
